@@ -13,10 +13,12 @@ class Lead(Base):
     company = Column(String(255))
     source = Column(String(100)) # e.g., 'Facebook Ads', 'Inbound Form'
     
-    # AI Interaction State
+    # AI Intelligence Layer
     score = Column(Float, default=0.0)
     status = Column(String(50), default="New")
     intent_summary = Column(Text)
+    sentiment = Column(String(50)) # 'Positive', 'Neutral', 'Negative'
+    predicted_intent = Column(String(100)) # 'Purchase', 'Information', 'Demo', 'Support'
     follow_up_count = Column(Integer, default=0)
     
     # Interaction History (Messages/Notes)

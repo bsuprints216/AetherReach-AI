@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Target, Zap, Clock, TrendingUp, Search, PlayCircle } from 'lucide-react';
+import { Users, Target, Zap, Clock, TrendingUp, Search, PlayCircle, ChevronRight, X } from 'lucide-react';
+import AIInsight from './AIInsight';
 
 const Dashboard = () => {
   const [isSimulating, setIsSimulating] = useState(false);
+  const [selectedLead, setSelectedLead] = useState<any>(null);
 
   const stats = [
     { label: "Total Leads", value: isSimulating ? "2,544" : "2,543", icon: Users, color: "text-blue-500" },
@@ -90,7 +92,11 @@ const Dashboard = () => {
             </thead>
             <tbody>
               {leads.map((lead, i) => (
-                <tr key={i} className="border-t border-slate-800/50 hover:bg-white/[0.02] transition-colors cursor-pointer group">
+                <tr 
+                  key={i} 
+                  onClick={() => setSelectedLead(lead)}
+                  className="border-t border-slate-800/50 hover:bg-white/[0.02] transition-colors cursor-pointer group"
+                >
                   <td className="p-6">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-300">
@@ -122,6 +128,39 @@ const Dashboard = () => {
           </table>
         </div>
       </div>
+
+      {/* Side Panel / AI Insight */}
+      <AnimatePresence>
+        {selectedLead && (
+          <>
+            <motion.div 
+               initial={{ opacity: 0 }}
+               animate={{ opacity: 1 }}
+               exit={{ opacity: 0 }}
+               onClick={() => setSelectedLead(null)}
+               className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
+            />
+            <motion.div 
+               initial={{ x: '100%' }}
+               animate={{ x: 0 }}
+               exit={{ x: '100%' }}
+               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+               className="fixed right-0 top-0 h-screen w-full md:w-[450px] bg-slate-950 border-l border-slate-800 z-[70] shadow-2xl overflow-y-auto"
+            >
+               <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-950/80 backdrop-blur sticky top-0">
+                  <h3 className="font-bold text-white uppercase text-xs tracking-widest">Lead Intelligence Detail</h3>
+                  <button 
+                    onClick={() => setSelectedLead(null)}
+                    className="p-2 hover:bg-white/5 rounded-full text-slate-500 hover:text-white transition-all"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+               </div>
+               <AIInsight lead={selectedLead} />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

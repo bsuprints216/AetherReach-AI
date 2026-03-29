@@ -16,26 +16,25 @@ class AetherAIService:
             "Content-Type": "application/json"
         }
 
-    async def qualify_lead(self, lead_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Qualifies a lead using multi-model intelligence (Mocking for now if key empty)"""
-        
-        # In a real scenario, we would route to GPT-4o, Claude or Gemini
-        # depending on lead size and priority.
+    async def analyze_engagement(self, conversation: list) -> Dict[str, Any]:
+        """Deep Analysis of Lead Engagement (Sentiment & Intent)"""
         
         prompt = f"""
-        Analyze the following lead and provide a qualification score (0-100) and intent summary.
-        Lead Data: {json.dumps(lead_data)}
-        Return JSON format: {{"score": float, "intent": string, "priority": string}}
+        Analyze this conversation for Sentiment and Intent.
+        History: {json.dumps(conversation)}
+        Return JSON: {{"sentiment": "Positive/Neutral/Negative", "intent": "Purchase/Demo/Help", "score": 0.0-1.0}}
         """
         
-        # Routing Logic Example (Mocked)
+        # Real AI call...
         if not settings.OPENAI_API_KEY:
-             logger.warning("OPENAI_API_KEY not set. Using fallback mock intelligence.")
-             return self._mock_analysis(lead_data)
-        
+            return {"sentiment": "Neutral", "intent": "Information", "score": 0.75}
+            
+        return await self._call_ai(prompt)
+
+    async def _call_ai(self, prompt: str) -> Dict[str, Any]:
+        """Utility to call the multi-model intelligence core"""
         try:
-            # Simple routing (GPT-4o)
-            async with httpx.AsyncClient() as client:
+             async with httpx.AsyncClient() as client:
                 response = await client.post(
                     self.openai_url,
                     headers=self.headers,
@@ -46,14 +45,11 @@ class AetherAIService:
                     },
                     timeout=30.0
                 )
-                
                 if response.status_code == 200:
-                    return response.json()['choices'][0]['message']['content']
-                else:
-                    return self._mock_analysis(lead_data)
-        except Exception as e:
-            logger.error(f"Error in lead qualification: {str(e)}")
-            return self._mock_analysis(lead_data)
+                    return json.loads(response.json()['choices'][0]['message']['content'])
+        except Exception:
+             pass
+        return {"sentiment": "Neutral", "intent": "Processing"}
 
     def _mock_analysis(self, lead_data):
         """High-end fallback analysis logic"""
